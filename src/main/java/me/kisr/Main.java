@@ -4,6 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import me.kisr.commands.CommandManager;
 import me.kisr.commands.Commands;
 import me.kisr.listeners.ButtonInteraction;
+import me.kisr.listeners.MessageRecieved;
 import me.kisr.listeners.ModalInteraction;
 import me.kisr.utils.FileUtils;
 import net.dv8tion.jda.api.JDA;
@@ -36,7 +37,7 @@ public class Main {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_PRESENCES, GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(new CommandManager(), new Commands(), new ButtonInteraction(), new ModalInteraction())
+                .addEventListeners(new CommandManager(), new Commands(), new ButtonInteraction(), new ModalInteraction(), new MessageRecieved())
                 .build();
 
     }

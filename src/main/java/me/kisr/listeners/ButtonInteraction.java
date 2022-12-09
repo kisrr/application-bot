@@ -12,11 +12,13 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -251,20 +253,23 @@ public class ButtonInteraction extends ListenerAdapter {
 
                 File ticketsFile = new File("files/tickets/" + event.getChannel().getId());
                 File ownersFile = new File("files/owners/" + datasplit[0]);
+                File transcriptsFile = new File("files/transcripts/" + event.getChannel().getId() + ".txt");
 
                 EmbedBuilder embed = new EmbedBuilder();
-                embed.setTitle("Application Closed");
+                embed.setTitle("Transcript Created");
                 embed.setColor(Color.RED);
 
                 embed.addField("Opened by", event.getGuild().getMemberById(datasplit[0]).getAsMention(), true);
                 embed.addField("Closed by", event.getUser().getAsMention(), true);
+                embed.addField("Date closed", "<t:" + Instant.now().getEpochSecond() + ":F>", false);
 
-                event.getGuild().getTextChannelById(Main.config.get("LOGS_CHANNEL")).sendMessageEmbeds(embed.build()).queue();
+                event.getGuild().getTextChannelById(Main.config.get("TRANSCRIPTS_CHANNEL")).sendMessageEmbeds(embed.build()).addFiles(FileUpload.fromData(transcriptsFile)).queue();
 
                 ownersFile.delete();
                 ticketsFile.delete();
+                transcriptsFile.delete();
 
-                event.reply("Deleting channel now!").queue();
+                event.reply("Deleting channel now!").setEphemeral(true).queue();
 
                 event.getChannel().delete().queue();
             }

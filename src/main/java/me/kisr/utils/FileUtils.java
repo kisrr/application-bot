@@ -16,14 +16,28 @@ public enum FileUtils {
         Path filesPath = Path.of("files");
         Path ticketsPath = Path.of("files/tickets");
         Path ownersPath = Path.of("files/owners");
+        Path transcriptsPath = Path.of("files/transcripts");
 
         try {
-            if (!Files.exists(filesPath)) {
-                System.out.println("Making file directories");
-                Files.createDirectories(filesPath);
-                Files.createDirectories(ticketsPath);
-                Files.createDirectories(ownersPath);
-                System.out.println("Finished making file directories");
+            if (Files.exists(filesPath) && Files.exists(ticketsPath) && Files.exists(ownersPath) && Files.exists(transcriptsPath)) {
+                System.out.println("Directories complete! Starting up now...");
+            } else {
+                if (!Files.exists(filesPath)) {
+                    System.out.println("\"files\" directory not found. Creating one...");
+                    Files.createDirectories(filesPath);
+                }
+                if (!Files.exists(ticketsPath)) {
+                    System.out.println("\"files/tickets\" directory not found. Creating one...");
+                    Files.createDirectories(ticketsPath);
+                }
+                if (!Files.exists(ownersPath)) {
+                    System.out.println("\"files/owners\" directory not found. Creating one...");
+                    Files.createDirectories(ownersPath);
+                }
+                if (!Files.exists(transcriptsPath)) {
+                    System.out.println("\"files/transcripts\" directory not found. Creating one...");
+                    Files.createDirectories(transcriptsPath);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

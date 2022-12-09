@@ -2,15 +2,18 @@ package me.kisr.listeners;
 
 import me.kisr.Main;
 import me.kisr.utils.FileUtils;
+import me.kisr.utils.FormatUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -58,6 +61,7 @@ public class ModalInteraction extends ListenerAdapter {
                         .complete().sendMessageEmbeds(embed.build()).setContent(event.getMember().getAsMention()).setActionRow(rows).queue(channel -> {
                             File ticketsFile = new File("files/tickets/" + channel.getChannel().getId());
                             File ownersFile = new File("files/owners/" + event.getMember().getId());
+                            File transcriptFile = new File("files/transcripts/" + channel.getChannel().getId() + ".txt");
 
                             try {
                                 ticketsFile.createNewFile();
@@ -76,6 +80,15 @@ public class ModalInteraction extends ListenerAdapter {
                                 ownersFile.createNewFile();
                                 FileWriter writer = new FileWriter(ownersFile);
                                 writer.write(channel.getChannel().getId());
+                                writer.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            try {
+                                transcriptFile.createNewFile();
+                                FileWriter writer = new FileWriter(transcriptFile);
+                                writer.write("Application created: " + FormatUtils.getTime() + "\n\n");
                                 writer.close();
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -103,6 +116,7 @@ public class ModalInteraction extends ListenerAdapter {
             String[] datasplit = FileUtils.readFile(new File("files/tickets/" + event.getChannel().getId())).split("36280b7179c69735773b65d0c595d3f1114400367759a2a21a22870e14a4ae47");
             File ownersFile = new File("files/owners/" + datasplit[0]);
             File ticketsFile = new File("files/tickets/" + event.getChannel().getId());
+            File transcriptsFile = new File("files/transcripts/" + event.getChannel().getId() + ".txt");
 
             if (datasplit[2].equalsIgnoreCase("crystal")) {
                 EmbedBuilder embed = new EmbedBuilder();
@@ -126,10 +140,22 @@ public class ModalInteraction extends ListenerAdapter {
                 }
                 event.getGuild().getTextChannelById(Main.config.get("RESULTS_CHANNEL")).sendMessageEmbeds(embed.build()).setContent(event.getGuild().getMemberById(datasplit[0]).getAsMention() + " was **accepted**").queue();
                 event.getGuild().addRoleToMember(event.getGuild().getMemberById(datasplit[0]), event.getGuild().getRoleById(Main.config.get("ACCEPTED_ROLE"))).queue();
-                event.reply("Done sending results!").queue();
+
+                EmbedBuilder embed1 = new EmbedBuilder();
+                embed1.setTitle("Transcript Created");
+                embed1.setColor(Color.RED);
+
+                embed1.addField("Opened by", event.getGuild().getMemberById(datasplit[0]).getAsMention(), true);
+                embed1.addField("Closed by", event.getUser().getAsMention(), true);
+                embed1.addField("Date closed", "<t:" + Instant.now().getEpochSecond() + ":F>", false);
+
+                event.getGuild().getTextChannelById(Main.config.get("TRANSCRIPTS_CHANNEL")).sendMessageEmbeds(embed1.build()).addFiles(FileUpload.fromData(transcriptsFile)).queue();
+
+                event.reply("Deleting channel now!").setEphemeral(true).queue();
 
                 ownersFile.delete();
                 ticketsFile.delete();
+                transcriptsFile.delete();
 
                 event.getChannel().delete().queue();
             } else if (datasplit[2].equalsIgnoreCase("sword")) {
@@ -154,10 +180,22 @@ public class ModalInteraction extends ListenerAdapter {
                 event.getGuild().getTextChannelById(Main.config.get("RESULTS_CHANNEL")).sendMessageEmbeds(embed.build()).setContent(event.getGuild().getMemberById(datasplit[0]).getAsMention() + " was **accepted**").queue();
                 event.getGuild().addRoleToMember(event.getGuild().getMemberById(datasplit[0]), event.getGuild().getRoleById(Main.config.get("ACCEPTED_ROLE"))).queue();
 
+
+                EmbedBuilder embed1 = new EmbedBuilder();
+                embed1.setTitle("Transcript Created");
+                embed1.setColor(Color.RED);
+
+                embed1.addField("Opened by", event.getGuild().getMemberById(datasplit[0]).getAsMention(), true);
+                embed1.addField("Closed by", event.getUser().getAsMention(), true);
+                embed1.addField("Date closed", "<t:" + Instant.now().getEpochSecond() + ":F>", false);
+
+                event.getGuild().getTextChannelById(Main.config.get("TRANSCRIPTS_CHANNEL")).sendMessageEmbeds(embed1.build()).addFiles(FileUpload.fromData(transcriptsFile)).queue();
+
                 ownersFile.delete();
                 ticketsFile.delete();
+                transcriptsFile.delete();
 
-                event.reply("Done sending results!").setEphemeral(true).queue();
+                event.reply("Deleting channel now!").setEphemeral(true).queue();
 
                 event.getChannel().delete().queue();
             }
@@ -171,6 +209,7 @@ public class ModalInteraction extends ListenerAdapter {
             String[] datasplit = FileUtils.readFile(new File("files/tickets/" + event.getChannel().getId())).split("36280b7179c69735773b65d0c595d3f1114400367759a2a21a22870e14a4ae47");
             File ownersFile = new File("files/owners/" + datasplit[0]);
             File ticketsFile = new File("files/tickets/" + event.getChannel().getId());
+            File transcriptsFile = new File("files/transcripts/" + event.getChannel().getId() + ".txt");
 
             if (datasplit[2].equalsIgnoreCase("crystal")) {
                 EmbedBuilder embed = new EmbedBuilder();
@@ -193,10 +232,23 @@ public class ModalInteraction extends ListenerAdapter {
                     embed.addField("Notes", "None", false);
                 }
                 event.getGuild().getTextChannelById(Main.config.get("RESULTS_CHANNEL")).sendMessageEmbeds(embed.build()).setContent(event.getGuild().getMemberById(datasplit[0]).getAsMention() + " was **denied**").queue();
-                event.reply("Done sending results!").queue();
+                event.reply("Deleting channel now!").setEphemeral(true).queue();
+
+
+                EmbedBuilder embed1 = new EmbedBuilder();
+                embed1.setTitle("Transcript Created");
+                embed1.setColor(Color.RED);
+
+                embed1.addField("Opened by", event.getGuild().getMemberById(datasplit[0]).getAsMention(), true);
+                embed1.addField("Closed by", event.getUser().getAsMention(), true);
+                embed1.addField("Date closed", "<t:" + Instant.now().getEpochSecond() + ":F>", false);
+
+                event.getGuild().getTextChannelById(Main.config.get("TRANSCRIPTS_CHANNEL")).sendMessageEmbeds(embed1.build()).addFiles(FileUpload.fromData(transcriptsFile)).queue();
+
 
                 ownersFile.delete();
                 ticketsFile.delete();
+                transcriptsFile.delete();
 
                 event.getChannel().delete().queue();
             } else if (datasplit[2].equalsIgnoreCase("sword")) {
@@ -220,10 +272,22 @@ public class ModalInteraction extends ListenerAdapter {
                 }
                 event.getGuild().getTextChannelById(Main.config.get("RESULTS_CHANNEL")).sendMessageEmbeds(embed.build()).setContent(event.getGuild().getMemberById(datasplit[0]).getAsMention() + " was **denied**").queue();
 
+
+                EmbedBuilder embed1 = new EmbedBuilder();
+                embed1.setTitle("Transcript Created");
+                embed1.setColor(Color.RED);
+
+                embed1.addField("Opened by", event.getGuild().getMemberById(datasplit[0]).getAsMention(), true);
+                embed1.addField("Closed by", event.getUser().getAsMention(), true);
+                embed1.addField("Date closed", "<t:" + Instant.now().getEpochSecond() + ":F>", false);
+
+                event.getGuild().getTextChannelById(Main.config.get("TRANSCRIPTS_CHANNEL")).sendMessageEmbeds(embed1.build()).addFiles(FileUpload.fromData(transcriptsFile)).queue();
+
                 ownersFile.delete();
                 ticketsFile.delete();
+                transcriptsFile.delete();
 
-                event.reply("Done sending results!").setEphemeral(true).queue();
+                event.reply("Deleting channel now!").setEphemeral(true).queue();
 
                 event.getChannel().delete().queue();
             }
